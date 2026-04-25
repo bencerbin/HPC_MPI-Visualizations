@@ -21,6 +21,8 @@ G = results["graph"]
 # 1. Time Series (binned)
 # -----------------------------
 
+# extra data for tooltips
+
 top_df = top_df.copy()
 top_df = top_df.reset_index(drop=True)
 
@@ -41,21 +43,22 @@ summary_min = top_df.loc[min_idx][["year_bin", "primaryTitle"]].rename(
 summary_dict = summary.set_index("year_bin")["max_title"].to_dict()
 summary_min_dict = summary_min.set_index("year_bin")["min_title"].to_dict()
 
-#
 
-print("\n=== SUMMARY (MAX) ===")
-print(summary.head(10))
-print("\nShape:", summary.shape)
-print("\nUnique bins:", summary["year_bin"].nunique())
-print("\nDuplicate bins (should be 0):")
-print(summary["year_bin"].duplicated().sum())
+# some debugging stuff
 
-print("\n=== SUMMARY (MIN) ===")
-print(summary_min.head(10))
-print("\nShape:", summary_min.shape)
-print("\nUnique bins:", summary_min["year_bin"].nunique())
-print("\nDuplicate bins (should be 0):")
-print(summary_min["year_bin"].duplicated().sum())
+# print("\n=== SUMMARY (MAX) ===")
+# print(summary.head(10))
+# print("\nShape:", summary.shape)
+# print("\nUnique bins:", summary["year_bin"].nunique())
+# print("\nDuplicate bins (should be 0):")
+# print(summary["year_bin"].duplicated().sum())
+
+# print("\n=== SUMMARY (MIN) ===")
+# print(summary_min.head(10))
+# print("\nShape:", summary_min.shape)
+# print("\nUnique bins:", summary_min["year_bin"].nunique())
+# print("\nDuplicate bins (should be 0):")
+# print(summary_min["year_bin"].duplicated().sum())
 
 #
 
@@ -63,9 +66,6 @@ custom_data = top_df["year_bin"].map(
     lambda y: [summary_dict.get(y, ""), summary_min_dict.get(y, "")]
 )
 
-
-# top_df = top_df.merge(summary, on="year_bin", how="left")
-# top_df = top_df.merge(summary_min, on="year_bin", how="left")
 
 fig_time = px.box(
     top_df,
@@ -126,7 +126,9 @@ top_movies_by_genre = (
 )
 
 genre_summary["top_movies"] = genre_summary["Genre"].map(top_movies_by_genre)
-# Take top 10 by count (or rating if you prefer)
+
+
+# Take top 10 by count 
 genre_summary = genre_summary.sort_values("movie_count", ascending=False).head(10)
 
 fig_genre = px.bar(
@@ -139,19 +141,22 @@ fig_genre = px.bar(
     }
 )
 
-# 🔥 Add rich tooltips
+# Add rich tooltips
 fig_genre.update_traces(
     customdata=genre_summary[["movie_count"]],
     hovertemplate=
         "<b>%{x}</b><br>" +
         "Avg Rating: %{y:.2f}<br>" +
-        "Movies: %{customdata[0]}<extra></extra>"
+        "Movies: %{customdata[0]}<extra></extra>" +
+        "Top Movies:<br>%{customdata[2]}<extra></extra>"
 )
 
 fig_genre.update_layout(template="plotly_white")
+
 # -----------------------------
 # 3. Network Graph
 # -----------------------------
+
 pos = nx.spring_layout(G, seed=42)
 
 edge_x = []
@@ -226,7 +231,7 @@ app.layout = html.Div([
         {"label": "Movie Count", "value": "movie_count"},
         {"label": "Average Rating", "value": "avg_rating"}
     ],
-    value="movie_count",  # default
+    value="movie_count",  
     clearable=False,
     style={"width": "300px", "margin": "10px auto"}
 ), 
@@ -326,16 +331,16 @@ def update_genre_chart(metric):
     Output("selected-node", "data"),
     Input("graph", "clickData"),
     State("selected-node", "data"),
-    prevent_initial_call=True   # 👈 ADD THIS
+    prevent_initial_call=True  
 )
 
 def update_network_viz(clickData, selected_node):
 
-    # No click → default
+    # No click -> default
     if clickData is None:
         return fig_graph, None
 
-    # If already highlighted → ANY click resets
+    # If already highlighted -> ANY click resets
     if selected_node is not None:
         return fig_graph, None
 
