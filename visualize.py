@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output, State
 # -----------------------------
 # Load data
 # -----------------------------
-with open("results_final.pkl", "rb") as f:
+with open("results_directors.pkl", "rb") as f:
     results = pickle.load(f)
 
 top_df = results["fantasy_movies"]
@@ -90,11 +90,6 @@ fig_time.update_traces(
         "Min Movie: %{customdata[1]}<extra></extra>"
 )
 
-
-
-# -----------------------------
-# 2. Genre Bar Chart
-# -----------------------------
 # -----------------------------
 # 2. Genre Analysis (Avg Rating)
 # -----------------------------
